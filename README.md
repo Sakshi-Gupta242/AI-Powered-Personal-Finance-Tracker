@@ -1,269 +1,309 @@
-# AaharSetu (आहारसेतु)
-### *“Safer Food. Smarter Communities.”*
-**Inclusive Food Safety & Community Assistance Platform**
+# AI-Powered Personal Finance Tracker and Smart Budgeting System
 
-[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF.svg?style=flat&logo=vite)](https://vitejs.dev/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB.svg?style=flat&logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6.svg?style=flat&logo=typescript)](https://www.typescriptlang.org/)
-[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC.svg?style=flat&logo=tailwind-css)](https://tailwindcss.com/)
-[![Python FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+> **Tagline:** *“Track. Analyze. Predict. Save.”*  
+> **A complete, production-ready full-stack AI/ML college mini project & portfolio application.**
 
 ---
 
-## 1. Project Overview
-**AaharSetu** is an independent, community-focused food safety prototype designed to bridge the gap between everyday consumers and small street food vendors. It empowers consumers to report and understand food safety observations (spoilage, adulteration, hygiene lapses) with real-time rule-based NLP classification, while equipping micro-vendors and food stalls with a practical 10-point self-assessment tool and low-cost improvement roadmaps (starting from ₹300).
+## 📌 1. Project Overview
 
-> **Important Positioning:**
-> *“AaharSetu is an independent student prototype exploring how AI, NLP, information retrieval and data analytics can support food-safety awareness, complaint understanding and practical hygiene improvement.”*
-> *(This is an educational prototype and NOT an official FSSAI system, regulatory inspection mechanism, or compliance certification).*
+The **AI-Powered Personal Finance Tracker and Smart Budgeting System** is an end-to-end web platform designed to help users track daily income and expenditures in Indian Rupee (**₹ INR**), enforce smart category budgeting, and leverage **Machine Learning (Scikit-Learn)** to predict future expenses and automatically categorize transaction descriptions.
 
----
-
-## 2. Problem Statement
-1. **Consumer Ambiguity:** Everyday consumers frequently encounter spoiled packaged goods, unhygienic street stalls, or suspected adulteration, but lack immediate structured guidance on risk severity, observation documentation, and evidence preservation.
-2. **Vendor Economic Hurdles:** Over 10 million informal street vendors in India operate on micro-budgets without access to affordable, structured hygiene education. Generic commercial standards demand expensive equipment rather than practical low-cost interventions.
-3. **Lack of Grounded, Trustworthy Advice:** Online information is often fragmented, overly clinical, or detached from practical street-level realities.
+### Core Philosophy
+* **100% Free & Realistic:** Zero reliance on paid third-party AI APIs (OpenAI/Gemini API keys not needed). Uses local Python **Scikit-Learn** models for instant predictions.
+* **Production-Grade Relational Architecture:** MySQL database schema with SQLAlchemy ORM, indexed queries, cascading foreign keys, and secure JWT authentication.
+* **Modern Interactive UI:** Responsive React 18 dashboard built with Vite, Tailwind CSS, Recharts visual analytics, and Lucide glyphs.
 
 ---
 
-## 3. Why AaharSetu?
-- **Dual-Stakeholder Architecture:** Unites consumer reporting with constructive vendor empowerment rather than punitive barriers.
-- **Bilingual & Inclusive:** Complete, natural English and Hindi (`हिन्दी`) interfaces tailored for diverse community members.
-- **Micro-Budget Practicality:** Generates realistic ₹300 - ₹2000 hygiene upgrade kits with practical tips for street vendors.
-- **Source-Grounded Assistant:** Grounded directly in public standards (WHO Five Keys to Safer Food, Codex Alimentarius CXC 43-1997) with open citations.
-- **Zero-Dependency Resilience:** Uses deterministic NLP and local storage abstractions so that full functionality works instantly offline or without paid API keys.
+## ✨ 2. Key Features
+
+| Feature | Description | Technology / Model |
+| :--- | :--- | :--- |
+| **Linear Regression Expense Prediction** | Analyzes multi-month historical spending sequence and predicts expected expense for the upcoming month with trend velocity (slope). | Scikit-Learn `LinearRegression` (OLS) |
+| **Smart Category Auto-Detection** | Detects category (Food, Travel, Shopping, Bills, etc.) live as you type descriptions like *"Domino's Pizza"* or *"Uber ride"*. | Scikit-Learn `TfidfVectorizer` + `LogisticRegression` |
+| **Smart Budget Guard** | Set monthly category thresholds with automated **80% warnings** and **100% overspending critical alerts**. | Dynamic variance engine |
+| **Spending Telemetry & Analytics** | Interactive graphs for Monthly Inflow vs Outflow, Category Donut breakdown, and Weekly Velocity. | Recharts + Pandas aggregations |
+| **Personalized AI Savings Engine** | Computes savings rate, detects month-over-month surges, and calculates annual compounding savings. | Statistical Reasoning Rules + 50/30/20 Rule |
+| **Executive Monthly Reports & PDF** | Detailed monthly statements with category distributions and 1-click downloadable vector PDF statements. | ReportLab + Browser Print Styles |
+| **1-Click Viva Demo Seeder** | Instant pre-population of 70+ realistic multi-month Indian Rupee transactions for demonstration. | Automated Seed Engine |
 
 ---
 
-## 4. Key Features
+## 🛠️ 3. Technology Stack
 
-| Module | Core Capabilities |
-| :--- | :--- |
-| **Consumer Incident Reporter** | 8-category rule-based & NLP auto-classification, risk factor detection, prototype priority assessment (Low/Medium/High), printable incident summary. |
-| **Vendor Stall Self-Check** | 10-point interactive hygiene audit with instant scoring, grade calculation (A/B/C/Critical), and specific gap identification. |
-| **Low-Cost Stall Planner** | Micro-budget upgrade planner (₹300, ₹500, ₹1000, Custom) mapping identified checklist gaps to affordable hygiene equipment. |
-| **Food Safety Assistant** | Source-grounded conversational assistant with verified WHO/Codex links and deterministic keyword retrieval. |
-| **Analytics Dashboard** | Live synthetic trends, category distribution bar charts, priority breakdown donut charts, and dataset export. |
-| **Bilingual Toggle** | Instant EN / हिन्दी switch across navigation, forms, checklists, result cards, and disclaimers. |
+### Frontend
+* **React.js 18** (Vite SPA)
+* **Tailwind CSS 3** (Modern responsive dark/light slate theme)
+* **Recharts** (Interactive SVG graphs & donut charts)
+* **Lucide React** (Vector iconography)
+* **React Router DOM 6** (Protected client-side navigation)
+
+### Backend & Machine Learning
+* **Python 3.10+ / Flask 3.x**
+* **Flask-SQLAlchemy 3.x** (ORM)
+* **PyMySQL & Cryptography** (MySQL connector)
+* **PyJWT & Werkzeug** (JWT token handling and password hashing)
+* **Scikit-Learn 1.4+** (`LinearRegression`, `TfidfVectorizer`, `LogisticRegression`)
+* **Pandas & NumPy** (Time-series data processing & aggregations)
+* **ReportLab** (Dynamic financial PDF generation)
+
+### Database
+* **MySQL 8.0+** (Production) / **SQLite** (Zero-config local fallback)
 
 ---
 
-## 5. Architecture
+## 📂 4. Project Structure
 
-```mermaid
-graph TD
-    A[Client Browser: React 18 + TS + Tailwind] --> B[Language Context / i18n Engine]
-    A --> C[Client Storage Abstraction / LocalStorage Engine]
-    A --> D[Deterministic Rule & NLP Classifier]
-    A --> E[Grounded Knowledge Engine / WHO Codex Base]
-    
-    subgraph Core Workflows
-        F[Consumer Concern Reporting] --> D
-        D --> G[Prototype Priority & Risk Evaluation]
-        G --> H[Printable Incident Summary]
-        
-        I[Vendor 10-Point Self-Check] --> J[Score & Gap Analysis Engine]
-        J --> K[Low-Cost Kit Budget Optimizer]
-        
-        L[Food Safety Assistant] --> E
-        E --> M[Answers with Verified Sources & Links]
-    end
-    
-    subgraph Optional Backend (Python FastAPI)
-        N[FastAPI Server :8000] --> O[REST Endpoints /api/classify, /api/vendor-check]
-    end
+```
+finance-tracker/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Navbar.tsx             # Responsive header with branding & quick actions
+│   │   │   ├── Sidebar.tsx            # Sidebar navigation & ML badge
+│   │   │   ├── MetricCard.tsx         # KPI cards with ₹ INR currency formatting
+│   │   │   ├── TransactionModal.tsx   # Add/Edit modal with AI auto-category button
+│   │   │   ├── BudgetModal.tsx        # Set/Edit budget limits modal
+│   │   │   ├── LoadingSpinner.tsx     # Loading animation
+│   │   │   ├── EmptyState.tsx         # Empty data states
+│   │   │   └── ProtectedRoute.tsx     # JWT authentication route guard
+│   │   ├── context/
+│   │   │   └── AuthContext.tsx        # Global JWT auth, user state, login/register/seed
+│   │   ├── pages/
+│   │   │   ├── LandingPage.tsx        # High-conversion modern landing page
+│   │   │   ├── LoginPage.tsx          # Login with 1-Click Demo Account fill
+│   │   │   ├── RegisterPage.tsx       # User registration with validation
+│   │   │   ├── DashboardPage.tsx      # KPI cards, 4 Recharts, AI callouts, recent logs
+│   │   │   ├── AddTransactionPage.tsx # Form with live AI category detector
+│   │   │   ├── TransactionsPage.tsx   # Search, filters, date range, pagination, CSV export
+│   │   │   ├── BudgetPage.tsx         # Category progress bars with >80% & >100% alerts
+│   │   │   ├── AIInsightsPage.tsx     # Linear Regression forecasting & Category ML Sandbox
+│   │   │   ├── ReportsPage.tsx        # Monthly statements with downloadable PDF
+│   │   │   └── ProfilePage.tsx        # Account management & viva specifications
+│   │   ├── services/
+│   │   │   └── api.ts                 # Typed API client with JWT interceptor
+│   │   ├── types/
+│   │   │   └── index.ts               # TypeScript interfaces
+│   │   ├── App.tsx                    # Main routing configuration
+│   │   ├── main.tsx                   # React root entry
+│   │   └── index.css                  # Tailwind styles & print CSS
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── backend/
+│   ├── app/
+│   │   ├── models/
+│   │   │   ├── user.py                # User model with hashed passwords
+│   │   │   ├── transaction.py         # Transaction model (Income/Expense, amount, date)
+│   │   │   └── budget.py              # Category budget thresholds
+│   │   ├── routes/
+│   │   │   ├── auth.py                # Register, Login, Me endpoints
+│   │   │   ├── transactions.py        # Transaction CRUD, filters, pagination
+│   │   │   ├── dashboard.py           # Dashboard KPIs, monthly/weekly aggregations
+│   │   │   ├── budgets.py             # Budget CRUD & real-time utilization
+│   │   │   ├── ai.py                  # Linear Regression & TF-IDF endpoints
+│   │   │   ├── reports.py             # Monthly statements & ReportLab PDF export
+│   │   │   └── seed.py                # Seeding API endpoints
+│   │   ├── ml/
+│   │   │   ├── expense_prediction.py  # Scikit-Learn Linear Regression model
+│   │   │   ├── category_classifier.py # TF-IDF + Logistic Regression text classifier
+│   │   │   ├── spending_analysis.py   # Statistical aggregations & trends
+│   │   │   └── recommendations.py     # AI saving recommendations engine
+│   │   ├── utils/
+│   │   │   └── auth_middleware.py     # JWT token decoding and @token_required decorator
+│   │   ├── config.py                  # Database and JWT configuration
+│   │   └── __init__.py                # Flask app factory
+│   ├── seed_data.py                   # Multi-month realistic demo transactions generator
+│   ├── requirements.txt
+│   └── run.py                         # Backend entry point (Port 5000)
+│
+├── database/
+│   └── schema.sql                     # MySQL 8.0+ relational schema DDL
+│
+├── .env.example                       # Environment configuration template
+├── Procfile                           # Production web process
+├── render.yaml                        # Render deployment blueprint
+├── vercel.json                        # Vercel SPA routing configuration
+└── README.md
 ```
 
 ---
 
-## 6. Technology Stack
-- **Frontend Framework:** React 18.3 (TypeScript) + Vite 6.0
-- **Styling & UI:** Tailwind CSS 3.4, Lucide Icons, Plus Jakarta Sans & Noto Sans Devanagari fonts
-- **Data Visualization:** Recharts (AreaChart, BarChart, PieChart)
-- **Routing:** React Router DOM (HashRouter for zero-config SPA deployment)
-- **State & Storage:** React Context API + LocalStorage persistence abstraction with seeded demo datasets
-- **Backend API (Optional):** Python 3.10+ FastAPI, Pydantic, Uvicorn
+## 🚀 5. Getting Started (Local Setup)
 
----
-
-## 7. Consumer Workflow
-1. User enters food name, observation description, optional location, date, and image evidence.
-2. User can test instant 1-click demo presets (e.g. *Swollen Packaged Juice*, *Exposed Roadside Food*, *Adulterated Milk*).
-3. System runs rule-based NLP classification and outputs:
-   - Reference ID (e.g. `AS-2025-4921`)
-   - Detected Category (e.g. *Spoilage/Expired Food*)
-   - Prototype Priority Assessment (*High Priority*)
-   - Observation Summary (e.g. *Possible spoilage or packaging-related food safety concern*)
-   - Actionable Next Steps (e.g. *Do not consume, preserve packaging and batch details, notify merchant*)
-4. User can open and print the clean, styled **Incident Summary Report**.
-
----
-
-## 8. Vendor Workflow
-1. Stall owner opens the **Check My Food Stall** module.
-2. Answers 10 straightforward questions (*Yes / No / Not Sure*) covering water, food covers, cross-contamination, waste, and temperature.
-3. Receives immediate hygiene score (0–100) and grade.
-4. Clicks **Build Low-Cost Plan** to enter their budget (e.g. ₹500).
-5. The optimizer selects targeted items (e.g. *Wire mesh domes @ ₹140*, *Handwash pump dispenser @ ₹95*, *Pedal dustbin @ ₹210*) addressing their specific self-assessment gaps.
-6. Vendor prints the **Stall Action Checklist** for market procurement.
-
----
-
-## 9. Complaint Classification Approach
-The classification engine employs a weighted multi-keyword and pattern-matching NLP heuristic across 8 standard food-safety categories:
-- **Spoilage / Expired Food:** Detects terms like *swollen, bloated, puffed, foul odor, mold, curdled*.
-- **Contamination:** Detects biological and physical foreign bodies (*insects, flies, glass, plastic, hair*).
-- **Adulteration:** Detects chemical dyes and unauthorized substitutes (*synthetic, neon color, detergent, urea, malachite green*).
-- **Packaging:** Identifies hermetic barrier failures (*broken seal, torn pouch, leaking, dented can*).
-- **Labelling:** Flags compliance gaps (*missing expiry, blank best before, no license number*).
-- **Hygiene & Food Premises:** Analyzes food handling and surrounding environmental sanitation (*dirty hands, open drain, garbage proximity*).
-
-Priority is categorized into **High**, **Medium**, or **Low** based on acute hazard severity indices (e.g., infant vulnerability, packaging bulges, toxic chemicals).
-
----
-
-## 10. Knowledge & Retrieval-Augmented Guidance
-The Food Safety Assistant uses curated, source-grounded references:
-- **WHO Five Keys to Safer Food Manual** (World Health Organization)
-- **Codex Alimentarius Code of Hygienic Practice for Street-Vended Foods (CXC 43-1997)** (FAO / WHO)
-- **WHO Food Safety Factsheets** (World Health Organization)
-
-Every query produces grounded safety advice accompanied by verified source titles, organization names, URLs, and safety badges.
-
----
-
-## 11. Database Design & Models
-
-```typescript
-// Core Complaint Entity
-interface Complaint {
-  id: string;                      // e.g. "AS-2025-0841"
-  foodName: string;
-  description: string;
-  category: CategoryType;
-  detectedCategory: CategoryType;
-  location: string;
-  stallType?: string;
-  date: string;
-  evidenceUrl?: string;
-  detectedRiskFactors: string[];
-  prototypePriority: 'Low' | 'Medium' | 'High';
-  priorityExplanation: string;
-  recommendedActions: string[];
-  status: 'Under Review' | 'Flagged for Guidance' | 'Resolved';
-  createdAt: string;
-}
-
-// Vendor Assessment Entity
-interface VendorCheckResult {
-  id: string;
-  stallName: string;
-  location: string;
-  score: number;                   // 0 - 100
-  grade: string;
-  completedPractices: string[];
-  areasNeedingAttention: string[];
-  priorityImprovements: string[];
-}
-```
-
----
-
-## 12. Screenshots Section
-*(Place application screenshots and demo GIFs here)*
-- `docs/screenshots/01_hero_bilingual.png` — Hero banner & Language Switch
-- `docs/screenshots/02_consumer_assessment.png` — Consumer reporting & priority breakdown
-- `docs/screenshots/03_vendor_checklist.png` — 10-point vendor hygiene audit
-- `docs/screenshots/04_budget_planner.png` — Low-cost stall improvement planner
-- `docs/screenshots/05_knowledge_assistant.png` — Source-grounded chat assistant
-- `docs/screenshots/06_analytics_dashboard.png` — Synthetic public safety metrics
-
----
-
-## 13. Local Setup & Quickstart
-
-### Prerequisites
-- Node.js 18+ and npm
-- (Optional) Python 3.10+ for backend server
-
-### Step 1: Clone Repository
+### Step 1: Clone the Repository
 ```bash
-# Note: The remote repository is hosted on GitHub:
-git clone https://github.com/Sakshi-Gupta242/ANPR-Command-Center.git aaharsetu
-cd aaharsetu
+git clone https://github.com/your-username/ai-personal-finance-tracker.git
+cd ai-personal-finance-tracker
 ```
 
-### Step 2: Install Frontend Dependencies
+### Step 2: Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+
+---
+
+### Step 3: Set Up and Run the Python Backend
+
+1. **Install Python dependencies:**
+```bash
+pip install -r backend/requirements.txt
+```
+
+2. **Start the Flask Backend:**
+```bash
+python backend/run.py
+```
+> The API server will launch at `http://localhost:5000`.  
+> Health check is accessible at `http://localhost:5000/api/health`.  
+> *Note: If MySQL is not configured, the app automatically initializes a local SQLite database (`finance_tracker.db`) with zero manual setup required.*
+
+---
+
+### Step 4: Set Up and Run the React Frontend
+
+1. **Install Node packages:**
 ```bash
 npm install
 ```
 
-### Step 3: Start Frontend Dev Server
+2. **Start the Vite Dev Server:**
 ```bash
 npm run dev
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-### Step 4 (Optional): Run FastAPI Backend
-```bash
-cd backend
-python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Linux/macOS:
-# source venv/bin/activate
-pip install -r requirements.txt
-python main.py
-```
-Backend API will run on [http://localhost:8000](http://localhost:8000).
+> The frontend application will start at `http://localhost:5173`.
 
 ---
 
-## 14. Environment Variables
-Copy `.env.example` to `.env`:
+## 🗄️ 6. MySQL Database Setup (Optional / Production)
+
+To connect to a local or cloud MySQL database:
+
+1. **Open MySQL CLI or phpMyAdmin and execute `database/schema.sql`:**
+```sql
+CREATE DATABASE IF NOT EXISTS finance_tracker_db;
+USE finance_tracker_db;
+```
+*(Or import the complete schema from `database/schema.sql`)*
+
+2. **Update your `.env` file with your MySQL connection string:**
 ```env
-VITE_APP_TITLE=AaharSetu
-VITE_ENABLE_EXTERNAL_API=false
-VITE_BACKEND_API_URL=http://localhost:8000
+DATABASE_URL=mysql+pymysql://root:your_mysql_password@localhost:3306/finance_tracker_db
+```
+
+3. Restart the backend server:
+```bash
+python backend/run.py
 ```
 
 ---
 
-## 15. Deployment Instructions
+## 🤖 7. How the Machine Learning Works
 
-### Deploy to Vercel / Netlify / GitHub Pages
-1. Build the production bundle:
-   ```bash
-   npm run build
-   ```
-2. The output directory is `dist/`.
-3. Deploy directly:
-   - **Vercel:** `vercel --prod` (Build command: `npm run build`, Output: `dist`)
-   - **Netlify:** `netlify deploy --prod --dir=dist`
-   - **GitHub Pages:** Push `dist/` to `gh-pages` branch.
+### A. Next-Month Expense Prediction (Linear Regression)
+* **File:** `backend/app/ml/expense_prediction.py`
+* **Algorithm:** Ordinary Least Squares (OLS) Linear Regression from Scikit-Learn:
+  $$\hat{Y} = m \cdot X + c$$
+* **Inputs:** Chronological array of monthly expense aggregates $X = [1, 2, \dots, N]$, $Y = [E_1, E_2, \dots, E_N]$.
+* **Outputs:** 
+  - Forecasted expense amount for month $N+1$
+  - Spending velocity ($m$ slope per month in ₹)
+  - Trend classification (*Upward / Downward / Stable*)
+  - Percentage growth relative to latest recorded month.
 
----
-
-## 16. Limitations
-- **Educational Scope:** AaharSetu is an educational student prototype and does not conduct physical laboratory testing or chemical assays.
-- **Self-Assessment Validity:** Vendor check scores rely on self-reported inputs and are intended for self-improvement rather than formal compliance audits.
-- **Medical Advice:** The platform provides general hygiene information and explicitly advises users to seek clinical healthcare in cases of acute illness.
-
----
-
-## 17. Future Scope
-- **Offline PWA Support:** Service worker caching for low-connectivity rural and street market environments.
-- **Voice-Based Interface:** Vernacular voice input (Hindi, Marathi, Bengali, Tamil) for street vendors with low literacy.
-- **Community Vendor Badge:** Verified community-endorsed micro-hygiene badges for street vendors completing progressive upgrades.
-- **OCR Packaging Scanner:** Optical Character Recognition for automatic expiration date and ingredient label analysis.
+### B. Automatic Category Classifier (NLP / TF-IDF)
+* **File:** `backend/app/ml/category_classifier.py`
+* **Algorithm:** Scikit-Learn `TfidfVectorizer(ngram_range=(1,2))` + `LogisticRegression()`.
+* **Seed Dataset:** Comprehensive corpus of 80+ typical Indian and global expense descriptions covering all 10 categories (Food, Travel, Shopping, Education, Bills, Entertainment, Healthcare, Rent, Transportation, Other).
+* **Live Sandbox:** Located under **AI Insights & ML** page, allowing evaluators to input custom strings and inspect predicted category, confidence percentage, and alternative ranking candidates.
 
 ---
 
-## 18. Disclaimer
-> **Disclaimer:** AaharSetu is an independent student prototype exploring how AI, NLP, information retrieval, and data analytics can support food-safety awareness, complaint understanding, and practical hygiene improvement.
-> 
-> AaharSetu is **NOT** an official FSSAI system, has **NO** affiliation with FSSAI, and does not issue legal compliance certificates or regulatory judgments.
+## 🎯 8. Demo Credentials & Viva Guide
+
+For instant evaluation and viva demonstration:
+
+| Account | Email | Password | Role |
+| :--- | :--- | :--- | :--- |
+| **Demo User** | `demo@financetracker.com` | `password123` | Pre-populated with 70+ transactions across 4 months |
+
+* **Quick Login:** On the Login page, click **"1-Click Login"** on the green banner.
+* **Seed Button:** Click the **"Seed Demo Data"** button in the navbar or Profile page anytime to reset sample records.
 
 ---
-*Developed for Educational & Social Good Demonstrations.*
+
+## 🌐 9. Deployment Instructions
+
+### Deploy Frontend to Vercel
+1. Push your code to GitHub.
+2. Sign in to [Vercel](https://vercel.com) and click **"Add New Project"**.
+3. Select your repository.
+4. Set **Environment Variables**:
+   - `VITE_API_URL`: `https://your-backend-service.onrender.com/api`
+5. Click **Deploy**. *(The included `vercel.json` ensures SPA routes load without 404 errors).*
+
+### Deploy Backend to Render or Railway
+1. Sign in to [Render](https://render.com).
+2. Create a new **Web Service** connected to your repository.
+3. Configure settings:
+   - **Environment:** `Python 3`
+   - **Build Command:** `pip install -r backend/requirements.txt`
+   - **Start Command:** `python backend/run.py`
+4. Set **Environment Variables**:
+   - `FLASK_ENV`: `production`
+   - `JWT_SECRET`: *(Generate a secure random string)*
+   - `DATABASE_URL`: *(Your MySQL or PostgreSQL URI from Aiven / PlanetScale / Supabase / Railway)*
+   - `FRONTEND_URL`: `https://your-app.vercel.app`
+5. Click **Deploy Web Service**.
+
+---
+
+## 📡 10. Complete REST API Reference
+
+### Authentication
+* `POST /api/auth/register` — Create new user account
+* `POST /api/auth/login` — Sign in and retrieve JWT Bearer token
+* `GET  /api/auth/me` — Get authenticated user details `[Protected]`
+
+### Transactions
+* `GET    /api/transactions` — List transactions (supports `search`, `category`, `type`, `start_date`, `end_date`, `page`, `limit`, `sort_by`, `sort_order`) `[Protected]`
+* `POST   /api/transactions` — Create transaction `[Protected]`
+* `GET    /api/transactions/<id>` — Get transaction details `[Protected]`
+* `PUT    /api/transactions/<id>` — Update transaction `[Protected]`
+* `DELETE /api/transactions/<id>` — Delete transaction `[Protected]`
+
+### Dashboard & Analytics
+* `GET /api/dashboard/summary` — Key KPI metrics, recent logs, warnings `[Protected]`
+* `GET /api/dashboard/monthly` — Monthly income vs expense trends `[Protected]`
+* `GET /api/dashboard/categories` — Expense category breakdown `[Protected]`
+* `GET /api/dashboard/weekly` — Weekly spending velocity `[Protected]`
+
+### Budgets
+* `GET    /api/budgets` — Category budget limits with real-time actual spending and warning states `[Protected]`
+* `POST   /api/budgets` — Set/update category budget limit `[Protected]`
+* `PUT    /api/budgets/<id>` — Update budget amount `[Protected]`
+* `DELETE /api/budgets/<id>` — Delete budget limit `[Protected]`
+
+### Machine Learning & AI
+* `GET  /api/ai/insights` — Comprehensive spending analysis, 50/30/20 target, and saving tips `[Protected]`
+* `GET  /api/ai/prediction` — Scikit-Learn Linear Regression forecast `[Protected]`
+* `POST /api/ai/predict-category` — Predict category from description string
+
+### Reports & Export
+* `GET /api/reports/monthly` — Structured monthly statement data `[Protected]`
+* `GET /api/reports/export-pdf` — Downloadable vector PDF statement generated via ReportLab `[Protected]`
+
+### Seeding
+* `POST /api/seed/demo-account` — Reset default demo account
+* `POST /api/seed/my-account` — Populate demo dataset into current account `[Protected]`
+
+---
+
+## 📜 11. License & Academic Integrity
+
+This project is built for academic presentation, demonstration, and personal portfolio use.  
+Feel free to adapt, extend, and deploy!

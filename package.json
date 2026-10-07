@@ -1,8 +1,8 @@
 {
-  "name": "aaharsetu",
+  "name": "ai-personal-finance-tracker",
   "private": true,
   "version": "1.0.0",
-  "description": "Inclusive Food Safety & Community Assistance Platform (Student Prototype)",
+  "description": "AI-Powered Personal Finance Tracker and Smart Budgeting System",
   "type": "module",
   "scripts": {
     "dev": "vite",

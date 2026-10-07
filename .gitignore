@@ -1,4 +1,42 @@
-﻿node_modules
-dist
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+build/
+
+# Environment files
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Python / Flask
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+finance_tracker.db
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
