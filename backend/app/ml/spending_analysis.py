@@ -6,8 +6,12 @@ month-over-month changes, and trend aggregations.
 
 from typing import List, Dict, Any
 from datetime import datetime, date, timedelta
-import pandas as pd
-import numpy as np
+try:
+    import pandas as pd
+    import numpy as np
+    HAS_PANDAS = True
+except ImportError:
+    HAS_PANDAS = False
 
 def analyze_user_spending(transactions: List[Dict[str, Any]], budgets: List[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
@@ -33,6 +37,139 @@ def analyze_user_spending(transactions: List[Dict[str, Any]], budgets: List[Dict
             'monthly_trend': [],
             'weekly_trend': [],
             'transaction_count': 0
+        }
+
+    if not HAS_PANDAS:
+        # Pure Python calculation
+        parsed_txns = []
+        for t in transactions:
+            try:
+                amt = float(t.get('amount', 0.0))
+            except (ValueError, TypeError):
+                amt = 0.0
+            date_str = str(t.get('transaction_date', ''))[:10]
+            try:
+                dt = datetime.strptime(date_str, '%Y-%m-%d')
+            except Exception:
+                dt = datetime.utcnow()
+            parsed_txns.append({
+                'type': t.get('type', 'Expense'),
+                'amount': amt,
+                'category': t.get('category', 'Other'),
+                'description': t.get('description', ''),
+                'dt': dt,
+                'ym': dt.strftime('%Y-%m'),
+                'date_str': dt.strftime('%Y-%m-%d')
+            })
+
+        income_txns = [t for t in parsed_txns if t['type'] == 'Income']
+        expense_txns = [t for t in parsed_txns if t['type'] == 'Expense']
+
+        total_income = sum(t['amount'] for t in income_txns)
+        total_expenses = sum(t['amount'] for t in expense_txns)
+        remaining_balance = total_income - total_expenses
+        savings_rate = round((remaining_balance / total_income * 100), 1) if total_income > 0 else 0.0
+
+        today = datetime.utcnow()
+        current_ym = today.strftime('%Y-%m')
+        all_months = sorted(list(set(t['ym'] for t in parsed_txns)))
+        if all_months:
+            if current_ym not in all_months:
+                current_ym = all_months[-1]
+            curr_idx = all_months.index(current_ym)
+            prev_ym = all_months[curr_idx - 1] if curr_idx > 0 else None
+        else:
+            prev_ym = None
+
+        curr_expense = sum(t['amount'] for t in expense_txns if t['ym'] == current_ym)
+        curr_income = sum(t['amount'] for t in income_txns if t['ym'] == current_ym)
+        curr_savings = curr_income - curr_expense
+
+        prev_expense = sum(t['amount'] for t in expense_txns if t['ym'] == prev_ym) if prev_ym else 0.0
+        mom_change_amt = curr_expense - prev_expense
+        mom_change_pct = round((mom_change_amt / prev_expense * 100), 1) if prev_expense > 0 else 0.0
+
+        cat_map = {}
+        for t in expense_txns:
+            c = t['category']
+            if c not in cat_map:
+                cat_map[c] = {'amount': 0.0, 'count': 0}
+            cat_map[c]['amount'] += t['amount']
+            cat_map[c]['count'] += 1
+
+        category_breakdown = []
+        for c, data in sorted(cat_map.items(), key=lambda x: x[1]['amount'], reverse=True):
+            category_breakdown.append({
+                'category': c,
+                'amount': round(data['amount'], 2),
+                'count': data['count'],
+                'percentage': round((data['amount'] / total_expenses * 100), 1) if total_expenses > 0 else 0.0
+            })
+
+        highest_spending_category = category_breakdown[0] if category_breakdown else None
+        
+        highest_expense_transaction = None
+        if expense_txns:
+            top_exp = max(expense_txns, key=lambda x: x['amount'])
+            highest_expense_transaction = {
+                'description': top_exp['description'],
+                'amount': top_exp['amount'],
+                'category': top_exp['category'],
+                'date': top_exp['date_str']
+            }
+
+        monthly_trend = []
+        for ym in all_months:
+            m_inc = sum(t['amount'] for t in income_txns if t['ym'] == ym)
+            m_exp = sum(t['amount'] for t in expense_txns if t['ym'] == ym)
+            dt_obj = datetime.strptime(ym, '%Y-%m')
+            monthly_trend.append({
+                'month': ym,
+                'label': dt_obj.strftime('%b %Y'),
+                'income': round(m_inc, 2),
+                'expense': round(m_exp, 2),
+                'savings': round(m_inc - m_exp, 2)
+            })
+
+        num_months = len(monthly_trend) or 1
+        avg_monthly_spending = round(total_expenses / num_months, 2)
+        if parsed_txns:
+            min_date = min(t['dt'] for t in parsed_txns)
+            max_date = max(t['dt'] for t in parsed_txns)
+            days_span = max(1, (max_date - min_date).days + 1)
+            avg_daily_spending = round(total_expenses / days_span, 2)
+        else:
+            avg_daily_spending = 0.0
+
+        weekly_map = {}
+        for t in sorted(expense_txns, key=lambda x: x['dt']):
+            w_sun = t['dt'] + timedelta(days=(6 - t['dt'].weekday()))
+            w_key = w_sun.strftime('%d %b')
+            weekly_map[w_key] = weekly_map.get(w_key, 0.0) + t['amount']
+
+        weekly_trend = [{'week': f"W/E {k}", 'amount': round(v, 2)} for k, v in list(weekly_map.items())[-8:]]
+
+        return {
+            'total_income': round(total_income, 2),
+            'total_expenses': round(total_expenses, 2),
+            'remaining_balance': round(remaining_balance, 2),
+            'savings_rate': savings_rate,
+            'current_month_spending': round(curr_expense, 2),
+            'current_month_income': round(curr_income, 2),
+            'current_month_savings': round(curr_savings, 2),
+            'current_month': current_ym,
+            'previous_month': prev_ym,
+            'previous_month_spending': round(prev_expense, 2),
+            'mom_spending_change_pct': mom_change_pct,
+            'mom_spending_change_amount': round(mom_change_amt, 2),
+            'avg_monthly_spending': avg_monthly_spending,
+            'avg_daily_spending': avg_daily_spending,
+            'highest_spending_category': highest_spending_category,
+            'highest_expense_transaction': highest_expense_transaction,
+            'category_breakdown': category_breakdown,
+            'monthly_trend': monthly_trend,
+            'weekly_trend': weekly_trend,
+            'transaction_count': len(transactions)
         }
 
     df = pd.DataFrame(transactions)

@@ -5,9 +5,13 @@ and forecast expected expenses for the upcoming month.
 """
 
 from typing import List, Dict, Any
-import numpy as np
-import pandas as pd
-from sklearn.linear_model import LinearRegression
+try:
+    import numpy as np
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
 
 def predict_next_month_expense(monthly_expenses: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -29,11 +33,20 @@ def predict_next_month_expense(monthly_expenses: List[Dict[str, Any]]) -> Dict[s
         }
 
     # Extract clean series
-    df = pd.DataFrame(monthly_expenses)
-    df['total_expense'] = pd.to_numeric(df['total_expense'], errors='coerce').fillna(0.0)
-    
-    n_points = len(df)
-    latest_expense = float(df['total_expense'].iloc[-1])
+    if HAS_SKLEARN:
+        df = pd.DataFrame(monthly_expenses)
+        df['total_expense'] = pd.to_numeric(df['total_expense'], errors='coerce').fillna(0.0)
+        expenses = df['total_expense'].tolist()
+    else:
+        expenses = []
+        for m in monthly_expenses:
+            try:
+                expenses.append(float(m.get('total_expense', 0.0)))
+            except (ValueError, TypeError):
+                expenses.append(0.0)
+
+    n_points = len(expenses)
+    latest_expense = float(expenses[-1])
 
     # If only 1 month of historical data is available
     if n_points == 1:
@@ -54,22 +67,29 @@ def predict_next_month_expense(monthly_expenses: List[Dict[str, Any]]) -> Dict[s
             }
         }
 
-    # Use Scikit-Learn Linear Regression
-    X = np.arange(1, n_points + 1).reshape(-1, 1)  # Month sequence indices: 1, 2, ..., N
-    y = df['total_expense'].values                 # Monthly expense amounts
-
-    model = LinearRegression()
-    model.fit(X, y)
-
-    # Predict for next month (time index N + 1)
-    next_x = np.array([[n_points + 1]])
-    predicted_val = float(model.predict(next_x)[0])
+    # Compute Linear Regression
+    if HAS_SKLEARN:
+        X = np.arange(1, n_points + 1).reshape(-1, 1)
+        y = np.array(expenses)
+        model = LinearRegression()
+        model.fit(X, y)
+        next_x = np.array([[n_points + 1]])
+        predicted_val = float(model.predict(next_x)[0])
+        slope = float(model.coef_[0])
+        intercept = float(model.intercept_)
+    else:
+        # Mathematically exact Ordinary Least Squares (OLS) closed form
+        sum_x = sum(range(1, n_points + 1))
+        sum_y = sum(expenses)
+        sum_xx = sum(i * i for i in range(1, n_points + 1))
+        sum_xy = sum(i * y for i, y in zip(range(1, n_points + 1), expenses))
+        denom = (n_points * sum_xx - sum_x * sum_x)
+        slope = (n_points * sum_xy - sum_x * sum_y) / denom if denom != 0 else 0.0
+        intercept = (sum_y - slope * sum_x) / n_points
+        predicted_val = slope * (n_points + 1) + intercept
 
     # Ensure predicted expense is non-negative
     predicted_val = max(0.0, round(predicted_val, 2))
-
-    slope = float(model.coef_[0])
-    intercept = float(model.intercept_)
 
     # Calculate percentage change compared to latest month
     if latest_expense > 0:
