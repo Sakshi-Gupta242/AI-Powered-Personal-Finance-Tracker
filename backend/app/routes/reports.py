@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify, send_file, make_response
 from datetime import datetime
 import io
+import os
+import json
+import urllib.request
 from ..models import Transaction, Budget
 from ..utils.auth_middleware import token_required
 from ..ml.spending_analysis import analyze_user_spending
@@ -258,3 +261,150 @@ def export_pdf_report(current_user):
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Failed to generate PDF: {str(e)}'}), 500
+
+@reports_bp.route('/send-email', methods=['POST'])
+@token_required
+def send_email_report(current_user):
+    """Send monthly financial report to the user's email via Resend transactional API."""
+    month = request.args.get('month', datetime.utcnow().month, type=int)
+    year = request.args.get('year', datetime.utcnow().year, type=int)
+    month_str = f"{year:04d}-{month:02d}"
+    dt_obj = datetime(year, month, 1)
+    month_name = dt_obj.strftime('%B %Y')
+
+    # Fetch transactions and metrics
+    txns = Transaction.query.filter_by(user_id=current_user.id).all()
+    txn_dicts = [t.to_dict() for t in txns]
+    month_txns = [t for t in txn_dicts if t['transaction_date'].startswith(month_str)]
+
+    month_income = sum(t['amount'] for t in month_txns if t['type'] == 'Income')
+    month_expenses = sum(t['amount'] for t in month_txns if t['type'] == 'Expense')
+    net_savings = month_income - month_expenses
+    savings_pct = round((net_savings / month_income * 100), 1) if month_income > 0 else 0.0
+
+    # Category breakdown
+    cat_expenses = {}
+    for t in month_txns:
+        if t['type'] == 'Expense':
+            cat = t['category']
+            cat_expenses[cat] = cat_expenses.get(cat, 0.0) + t['amount']
+
+    # AI Highlights
+    budgets = Budget.query.filter_by(user_id=current_user.id, month=month, year=year).all()
+    budget_dicts = [b.to_dict() for b in budgets]
+    ai_analysis = analyze_user_spending(txn_dicts, budget_dicts)
+    rec_data = generate_financial_recommendations(ai_analysis, budget_dicts, cat_expenses, {})
+
+    # Construct clean email HTML
+    rows_html = "".join([
+        f"<tr><td style='padding:8px 12px;border-bottom:1px solid #e2e8f0;'>{cat}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;'>Rs. {amt:,.2f}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;'>{round((amt/month_expenses*100),1) if month_expenses>0 else 0}%</td></tr>"
+        for cat, amt in sorted(cat_expenses.items(), key=lambda x: x[1], reverse=True)
+    ]) or "<tr><td colspan='3' style='padding:12px;text-align:center;color:#64748b;'>No expenses recorded</td></tr>"
+
+    tip_text = rec_data['savings_tips'][0] if rec_data.get('savings_tips') else 'Maintain an emergency fund equivalent to 3-6 months of expenses.'
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset='utf-8'></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 24px 32px; color: #ffffff;">
+                <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">SmartFinance.AI</h1>
+                <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">Monthly Financial Statement — {month_name}</p>
+            </div>
+            <div style="padding: 24px 32px;">
+                <p style="font-size: 14px; margin-top: 0;">Hello <strong>{current_user.name}</strong>,</p>
+                <p style="font-size: 13px; color: #475569;">Here is your automated financial report and AI-generated spending analysis for <strong>{month_name}</strong>.</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 10px 12px; text-align: left; font-size: 12px; color: #475569; text-transform: uppercase;">Metric</th>
+                        <th style="padding: 10px 12px; text-align: right; font-size: 12px; color: #475569; text-transform: uppercase;">Amount</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Total Income</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #059669; font-weight: 700;">Rs. {month_income:,.2f}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Total Expenses</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #e11d48; font-weight: 700;">Rs. {month_expenses:,.2f}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Net Savings</td>
+                        <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: right; color: #0f172a; font-weight: 700;">Rs. {net_savings:,.2f}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 12px; font-weight: 600;">Savings Rate</td>
+                        <td style="padding: 10px 12px; text-align: right; color: #4f46e5; font-weight: 700;">{savings_pct}%</td>
+                    </tr>
+                </table>
+
+                <h3 style="font-size: 13px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 8px;">Category Breakdown</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
+                    <thead style="background: #f8fafc;">
+                        <tr>
+                            <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: #64748b;">Category</th>
+                            <th style="padding: 8px 12px; text-align: right; font-size: 11px; color: #64748b;">Amount</th>
+                            <th style="padding: 8px 12px; text-align: right; font-size: 11px; color: #64748b;">Share</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows_html}
+                    </tbody>
+                </table>
+
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; margin-top: 16px;">
+                    <h4 style="margin: 0 0 8px 0; color: #065f46; font-size: 13px;">AI Financial Insights</h4>
+                    <p style="margin: 0; font-size: 12px; color: #047857; line-height: 1.5;">
+                        • <strong>Financial Health:</strong> {rec_data.get('financial_health', 'Good')}<br/>
+                        • <strong>AI Tip:</strong> {tip_text}
+                    </p>
+                </div>
+            </div>
+            <div style="padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center; font-size: 11px; color: #94a3b8;">
+                AI-Powered Personal Finance Tracker & Smart Budgeting System
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    resend_api_key = os.environ.get('RESEND_API_KEY')
+    if resend_api_key:
+        payload = json.dumps({
+            "from": "SmartFinance <onboarding@resend.dev>",
+            "to": [current_user.email],
+            "subject": f"Your {month_name} Financial Statement - SmartFinance.AI",
+            "html": html_content
+        }).encode('utf-8')
+        try:
+            req = urllib.request.Request(
+                "https://api.resend.com/emails",
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {resend_api_key}",
+                    "Content-Type": "application/json",
+                    "User-Agent": "SmartFinance-App/1.0"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return jsonify({
+                    'success': True,
+                    'simulated': False,
+                    'message': f"Monthly financial report successfully delivered to {current_user.email}!"
+                }), 200
+        except Exception as e:
+            return jsonify({
+                'success': True,
+                'simulated': True,
+                'message': f"Report generated for {current_user.email} (Email service notice: {str(e)})"
+            }), 200
+    else:
+        return jsonify({
+            'success': True,
+            'simulated': True,
+            'message': f"Monthly report generated for {current_user.email}! (Set RESEND_API_KEY in environment to enable live transactional email delivery)"
+        }), 200

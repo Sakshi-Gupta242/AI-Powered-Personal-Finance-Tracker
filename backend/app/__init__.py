@@ -9,14 +9,13 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Initialize CORS
-    frontend_url = app.config.get('FRONTEND_URL', '*')
-    if frontend_url and frontend_url != '*':
-        # Allow both production Vercel frontend and local development
-        allowed_origins = [frontend_url, "http://localhost:5173", "http://127.0.0.1:5173"]
-        CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
-    else:
-        CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # Initialize CORS (Permissive for all Vercel domains, preview URLs, and localhost)
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "*"}},
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+    )
 
     # Initialize Database
     db.init_app(app)
@@ -39,6 +38,9 @@ def create_app(config_class=Config):
     app.register_blueprint(seed_bp)
 
     # Health check route
+    @app.route('/', methods=['GET'])
+    @app.route('/api', methods=['GET'])
+    @app.route('/api/', methods=['GET'])
     @app.route('/api/health', methods=['GET'])
     def health_check():
         return jsonify({
@@ -61,7 +63,10 @@ def create_app(config_class=Config):
         try:
             db.create_all()
             from .models import User
-            from seed_data import populate_seed_data
+            try:
+                from seed_data import populate_seed_data
+            except ImportError:
+                from backend.seed_data import populate_seed_data
             if User.query.count() == 0:
                 print("Initial database setup: Auto-seeding default demo account (demo@financetracker.com)...")
                 populate_seed_data(None)

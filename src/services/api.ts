@@ -2,7 +2,17 @@
  * API Service Client for AI-Powered Personal Finance Tracker
  */
 
-let rawApiUrl = ((import.meta as any).env?.VITE_API_URL) || 'http://localhost:5000/api';
+let rawApiUrl = ((import.meta as any).env?.VITE_API_URL) || '';
+
+if (!rawApiUrl) {
+  // In production (not localhost/127.0.0.1), use relative /api path so requests route seamlessly
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    rawApiUrl = '/api';
+  } else {
+    rawApiUrl = 'http://localhost:5000/api';
+  }
+}
+
 // Remove any trailing slashes
 rawApiUrl = rawApiUrl.replace(/\/+$/, '');
 // Ensure it ends with /api
@@ -32,18 +42,31 @@ class ApiService {
       headers,
     };
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    } catch (networkError: any) {
+      console.error(`[API Network Error] Failed connecting to: ${API_BASE_URL}${endpoint}`, networkError);
+      throw new Error(
+        `Unable to connect to backend server (${API_BASE_URL}). If using Render, please allow 30-45s for the free server to wake up, or check VITE_API_URL in Vercel settings.`
+      );
+    }
+
     // Handle binary / PDF download responses directly
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/pdf')) {
       return (await response.blob()) as unknown as T;
     }
 
-    const data = await response.json();
+    let data: any = {};
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      data = { message: `Server returned status ${response.status} ${response.statusText}` };
+    }
 
     if (!response.ok) {
-      const errorMessage = data.message || 'An error occurred with the request';
+      const errorMessage = data.message || `Request failed with status ${response.status}`;
       // If 401 unauthorized, optionally clear invalid token
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -238,6 +261,16 @@ class ApiService {
     }
 
     return await response.blob();
+  }
+
+  async sendEmailReport(month?: number, year?: number) {
+    const query = new URLSearchParams();
+    if (month) query.append('month', String(month));
+    if (year) query.append('year', String(year));
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return this.request<{ success: boolean; message: string; simulated?: boolean }>(`/reports/send-email${queryString}`, {
+      method: 'POST',
+    });
   }
 
   // --- Demo Seeding APIs ---

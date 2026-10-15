@@ -4,6 +4,8 @@ import {
   Download,
   Loader2,
   Sparkles,
+  Mail,
+  CheckCircle2,
 } from 'lucide-react';
 import api from '../services/api';
 import { MonthlyReport } from '../types';
@@ -32,6 +34,8 @@ export const ReportsPage: React.FC = () => {
   const [report, setReport] = useState<MonthlyReport | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+  const [isSendingEmail, setIsSendingEmail] = useState<boolean>(false);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -73,6 +77,22 @@ export const ReportsPage: React.FC = () => {
       window.print();
     } finally {
       setIsDownloadingPdf(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    setIsSendingEmail(true);
+    setEmailStatus(null);
+    try {
+      const res = await api.sendEmailReport(selectedMonth, selectedYear);
+      setEmailStatus(res.message || 'Report sent to your registered email successfully!');
+      setTimeout(() => setEmailStatus(null), 6000);
+    } catch (err: any) {
+      console.error('Failed to send email:', err);
+      setEmailStatus(err.message || 'Failed to send email report');
+      setTimeout(() => setEmailStatus(null), 6000);
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -129,6 +149,20 @@ export const ReportsPage: React.FC = () => {
           </select>
 
           <button
+            onClick={handleSendEmail}
+            disabled={isSendingEmail}
+            className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition disabled:opacity-50"
+            title="Send financial statement to registered email"
+          >
+            {isSendingEmail ? (
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+            ) : (
+              <Mail className="w-4 h-4 text-emerald-600" />
+            )}
+            <span>Email Report</span>
+          </button>
+
+          <button
             onClick={handleBrowserPrint}
             className="inline-flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition"
           >
@@ -150,6 +184,14 @@ export const ReportsPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Email Status Notification */}
+      {emailStatus && (
+        <div className="print:hidden p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs font-medium text-emerald-800 dark:text-emerald-200 flex items-center space-x-2 shadow-sm animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{emailStatus}</span>
+        </div>
+      )}
 
       {/* Printable Report Document Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xl space-y-8 print:border-none print:shadow-none print:p-0">

@@ -1,6 +1,9 @@
 from flask import Blueprint, jsonify
 from ..utils.auth_middleware import token_required
-from seed_data import populate_seed_data
+try:
+    from seed_data import populate_seed_data
+except ImportError:
+    from backend.seed_data import populate_seed_data
 from ..models import User
 
 seed_bp = Blueprint('seed', __name__, url_prefix='/api/seed')

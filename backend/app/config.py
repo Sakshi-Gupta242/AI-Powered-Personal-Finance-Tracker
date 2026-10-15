@@ -22,6 +22,9 @@ class Config:
         elif raw_db_url.startswith('postgres://'):
             raw_db_url = raw_db_url.replace('postgres://', 'postgresql://', 1)
         DATABASE_URL = raw_db_url
+    elif os.environ.get('VERCEL'):
+        # On Vercel serverless, root /var/task is read-only; use /tmp for SQLite
+        DATABASE_URL = "sqlite:////tmp/finance_tracker.db"
     else:
         # Default local SQLite for zero-config quick start, or MySQL if specified
         base_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
